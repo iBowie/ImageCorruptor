@@ -7,4 +7,12 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="Q:\_OLD_SYSTEM\Users\admin\source\repos\ImageCorruptor\ImageCorruptor\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Q:\_OLD_SYSTEM\Users\admin\source\repos\ImageCorruptor\ImageCorruptor\.editorconfig" />
+  </ItemGroup>
+
 </Project>

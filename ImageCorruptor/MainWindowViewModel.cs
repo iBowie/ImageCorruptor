@@ -17,6 +17,7 @@ namespace ImageCorruptor
 
             originalImageData = Array.Empty<byte>();
             corruptedImageData = Array.Empty<byte>();
+            _noiseSource = null;
             fileExt = "";
             _userSeed = "";
             _currentSeed = "";
@@ -50,15 +51,18 @@ namespace ImageCorruptor
         private MemoryStream? originalMemoryStream;
         private MemoryStream? corruptedMemoryStream;
         private string fileExt;
+        private byte[]? _noiseSource;
 
         private Random _currentRandom;
 
-        private ICommand? 
+        private ICommand?
             _corruptCommand,
             _renderCommand,
             _clearCorruptCommand,
+            _setNoiseSourceCommand,
+            _resetNoiseSourceCommand,
             _loadImageCommand,
-            _saveCommand, 
+            _saveCommand,
             _exitCommand;
         public ICommand LoadImageCommand
         {
@@ -127,9 +131,9 @@ namespace ImageCorruptor
 
                     PngBitmapEncoder pngbe = new();
                     pngbe.Frames.Add(BitmapFrame.Create(rtb));
-                    
+
                     using FileStream fs = new(sfd.FileName, FileMode.Create);
-                    
+
                     pngbe.Save(fs);
                 }
             }, () => IsImageLoaded);
@@ -141,7 +145,33 @@ namespace ImageCorruptor
                 View.Close();
             });
         }
+        public ICommand SetNoiseSourceCommand
+        {
+            get
+            {
+                return _setNoiseSourceCommand ??= new RelayCommand(() =>
+                {
+                    OpenFileDialog ofd = new();
 
+                    if (ofd.ShowDialog() != true) return;
+
+                    _noiseSource = File.ReadAllBytes(ofd.FileName);
+                });
+            }
+        }
+        public ICommand ResetNoiseSourceCommand
+        {
+            get
+            {
+                return _resetNoiseSourceCommand ??= new RelayCommand(() =>
+                {
+                    _noiseSource = null;
+                }, () =>
+                {
+                    return _noiseSource is not null;
+                });
+            }
+        }
         public ICommand CorruptCommand
         {
             get => _corruptCommand ??= new RelayCommand(() =>
@@ -152,7 +182,16 @@ namespace ImageCorruptor
 
                 byte[] newBytes = new byte[size]; // allocate memory for new, corrupted data
 
-                r.NextBytes(newBytes); // generate bytes
+                if (_noiseSource is null)
+                {
+                    r.NextBytes(newBytes); // generate bytes
+                }
+                else
+                {
+                    var noiseSourcePos = r.Next(0, _noiseSource.Length - size);
+
+                    Array.Copy(_noiseSource, noiseSourcePos, newBytes, 0, size);
+                }
 
                 int pos = r.Next(0, originalImageData.Length - size); // select random position
 
@@ -246,7 +285,7 @@ namespace ImageCorruptor
             {
                 OriginalImage = null;
             }
-        
+
             try
             {
                 var newCorrupted = new BitmapImage();

@@ -16,7 +16,10 @@
                 <MenuItem Header="Open" Command="{Binding LoadImageCommand}"/>
                 <MenuItem Header="Render to image" ToolTip="For when file gets corrupted too much" Command="{Binding RenderCommand}"/>
                 <MenuItem Header="Save as..." Command="{Binding SaveCommand}"/>
-                <Separator/>
+				<Separator/>
+				<MenuItem Header="Set Noise Source" Command="{Binding SetNoiseSourceCommand}"/>
+				<MenuItem Header="Reset Noise Source" Command="{Binding ResetNoiseSourceCommand}"/>
+				<Separator/>
                 <MenuItem Header="Exit" Command="{Binding ExitCommand}"/>
             </MenuItem>
         </Menu>
@@ -51,7 +54,7 @@
                     <TextBox Margin="5" Text="{Binding UserSeed, UpdateSourceTrigger=PropertyChanged}"/>
                     <TextBlock Text="Size of blocks" Margin="5"/>
                     <Slider Margin="5" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0" Value="{Binding SizeOfBlocks}"
-                            Minimum="1" Maximum="255"/>
+                            Minimum="1" Maximum="65535"/>
                 </StackPanel>
             </Grid>
         </Grid>
