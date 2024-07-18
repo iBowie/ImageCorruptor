@@ -180,22 +180,24 @@ namespace ImageCorruptor
 
                 int size = Math.Min(originalImageData.Length, SizeOfBlocks); // consecutive bytes to destroy
 
-                byte[] newBytes = new byte[size]; // allocate memory for new, corrupted data
-
                 if (_noiseSource is null)
                 {
+                    byte[] newBytes = new byte[size]; // allocate memory for new, corrupted data
+
                     r.NextBytes(newBytes); // generate bytes
+
+                    int pos = r.Next(0, originalImageData.Length - size); // select random position
+
+                    newBytes.CopyTo(corruptedImageData, pos); // insert new bytes
                 }
                 else
                 {
                     var noiseSourcePos = r.Next(0, _noiseSource.Length - size);
 
-                    Array.Copy(_noiseSource, noiseSourcePos, newBytes, 0, size);
+                    int pos = r.Next(0, originalImageData.Length - size); // select random position
+
+                    Array.Copy(_noiseSource, noiseSourcePos, corruptedImageData, pos, size);
                 }
-
-                int pos = r.Next(0, originalImageData.Length - size); // select random position
-
-                newBytes.CopyTo(corruptedImageData, pos); // insert new bytes
 
                 RefreshPreview(); // render!
             }, () => IsImageLoaded);
